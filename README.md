@@ -86,24 +86,6 @@ sudo chmod +x /usr/local/bin/switch-to-assetto.sh
 sudo chmod +x /usr/local/bin/switch-to-minecraft.sh
 ```
 
-## ⚠️ Avertissement
-
-Ce projet est destiné à un usage personnel sur réseau local. Les ports, domaine, credentials et IP publique sont à adapter à ta propre situation. Ne jamais committer les fichiers réels de configuration contenant des secrets.
-
-## 🔄 Mise à jour du dépôt
-
-```bash
-cd ~/in-house-server-system
-
-# Toujours vérifier avant de committer
-git status
-git diff --staged | grep -i "password\|token\|secret" || echo "Propre"
-
-git add fichier_modifie
-git commit -m "Description de la modification"
-git push
-```
-
 ## 📄 Licence
 
 Projet personnel — usage libre pour inspiration.
