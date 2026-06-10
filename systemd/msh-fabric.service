@@ -1,0 +1,15 @@
+[Unit]
+Description=MSH Fabric 1.20+
+After=network.target
+
+[Service]
+User=minecraft
+WorkingDirectory=/opt/minecraft/msh-fabric
+ExecStart=/opt/minecraft/msh-fabric/msh
+Restart=on-failure
+RestartSec=5s
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

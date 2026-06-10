@@ -1,0 +1,33 @@
+{
+  "panel": {
+    "port": 4444,
+    "username": "admin",
+    "password": "votre_mot_de_passe_ici",
+    "sessionSecret": "changez_cette_valeur_par_une_chaine_aleatoire_longue"
+  },
+  "electricity": {
+    "ratePerKwh": 0.206
+  },
+  "servers": {
+    "fabric": {
+      "name": "Fabric 1.20+",
+      "service": "msh-fabric",
+      "logFile": "/opt/minecraft/fabric/logs/latest.log",
+      "rcon": {
+        "host": "127.0.0.1",
+        "port": 25585,
+        "password": "votre_password_rcon_fabric"
+      }
+    },
+    "paper": {
+      "name": "Paper 1.17.1",
+      "service": "msh-paper",
+      "logFile": "/opt/minecraft/paper/logs/latest.log",
+      "rcon": {
+        "host": "127.0.0.1",
+        "port": 25586,
+        "password": "votre_password_rcon_paper"
+      }
+    }
+  }
+}

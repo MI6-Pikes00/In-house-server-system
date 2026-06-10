@@ -1,0 +1,20 @@
+[Unit]
+Description=Assetto Corsa Dedicated Server
+After=network.target
+
+[Service]
+User=user
+WorkingDirectory=/opt/assetto
+Environment=WINEPREFIX=/home/user/.wine64
+Environment=DISPLAY=
+ExecStart=/usr/bin/wine /opt/assetto/original.exe
+Restart=on-failure
+RestartSec=5s
+StandardOutput=journal
+StandardError=journal
+TimeoutStopSec=15
+KillMode=mixed
+KillSignal=SIGTERM
+
+[Install]
+WantedBy=multi-user.target

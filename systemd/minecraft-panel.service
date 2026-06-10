@@ -1,0 +1,15 @@
+[Unit]
+Description=Minecraft Web Panel
+After=network.target
+
+[Service]
+User=user
+WorkingDirectory=/opt/minecraft-panel
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=5s
+StandardOutput=append:/var/log/minecraft-panel/auth.log
+StandardError=append:/var/log/minecraft-panel/auth.log
+
+[Install]
+WantedBy=multi-user.target

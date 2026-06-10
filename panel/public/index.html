@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LiteCorps Panel</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="ac-browser.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231a0a2e'/%3E%3Crect x='2' y='2' width='28' height='28' fill='%23200a3a'/%3E%3Crect x='4' y='4' width='8' height='8' fill='%232d0f52' opacity='0.6'/%3E%3C/svg%3E">
+</head>
+<!-- Popup chargement bascule -->
+<div id="modal-loading" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:2000;justify-content:center;align-items:center;flex-direction:column;gap:16px">
+  <div style="width:60px;height:60px;border:4px solid #1e3a5f;border-top-color:#e94560;border-radius:50%;animation:spin 1s linear infinite"></div>
+  <div id="loading-text" style="color:#eee;font-size:1rem;font-weight:bold">Bascule en cours...</div>
+  <div id="loading-sub" style="color:#4a5568;font-size:0.85rem">Veuillez patienter</div>
+</div>
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+<body>
+  <div id="login-screen">
+    <div class="login-box">
+      <h1>🎮 LiteCorps Panel</h1>
+      <input type="text" id="username" placeholder="Identifiant" />
+      <input type="password" id="password" placeholder="Mot de passe" />
+      <button onclick="login()">Connexion</button>
+      <p id="login-error" class="error"></p>
+    </div>
+  </div>
+
+  <div id="main-panel" style="display:none">
+    <nav class="sidebar">
+      <div class="sidebar-title">🎮 LiteCorps</div>
+      <button class="nav-btn active" onclick="showTab('dashboard', this)">📊 Dashboard</button>
+      <div class="sidebar-section">⛏️ Minecraft</div>
+      <button class="nav-btn" onclick="showTab('fabric', this)">🟢 Fabric 1.20+</button>
+      <button class="nav-btn" onclick="showTab('paper', this)">🔵 Paper 1.17.1</button>
+      <div class="sidebar-section">🏎️ Racing</div>
+      <button class="nav-btn" onclick="showTab('assetto', this)">🏎️ Assetto Corsa</button>
+      <button class="nav-btn" onclick="showTab('ac-browser', this)">🎨 Navigateur AC</button>
+      <div class="sidebar-section">⚙️ Système</div>
+      <button class="nav-btn" onclick="showTab('settings', this)">⚙️ Settings</button>
+      <button class="nav-btn" id="theme-toggle-btn" onclick="toggleTheme()">🌙 Mode sombre</button>
+      <button class="nav-btn logout" onclick="logout()">🚪 Déconnexion</button>
+    </nav>
+
+    <main class="content">
+
+      <!-- Bouton personnaliser -->
+      <button class="customize-btn" onclick="toggleCustomizePanel()">⚙️ Personnaliser</button>
+
+      <!-- Panneau de personnalisation -->
+      <div id="customize-panel" class="customize-panel">
+        <button class="customize-close" onclick="toggleCustomizePanel()">✕</button>
+        <div class="customize-panel-title">⚙️ Personnaliser</div>
+        <div class="customize-panel-sub">Affiche ou masque les widgets du dashboard</div>
+
+        <div class="widget-toggle-item">
+          <span class="widget-toggle-label">💾 RAM &amp; CPU</span>
+          <label class="toggle-switch"><input type="checkbox" id="toggle-stats" checked onchange="toggleWidget('stats', this.checked)"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="widget-toggle-item">
+          <span class="widget-toggle-label">🌡️ Température</span>
+          <label class="toggle-switch"><input type="checkbox" id="toggle-temp" checked onchange="toggleWidget('temp', this.checked)"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="widget-toggle-item">
+          <span class="widget-toggle-label">💿 Disque</span>
+          <label class="toggle-switch"><input type="checkbox" id="toggle-disk" checked onchange="toggleWidget('disk', this.checked)"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="widget-toggle-item">
+          <span class="widget-toggle-label">⏱️ Uptime</span>
+          <label class="toggle-switch"><input type="checkbox" id="toggle-uptime" checked onchange="toggleWidget('uptime', this.checked)"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="widget-toggle-item">
+          <span class="widget-toggle-label">🔌 Consommation</span>
+          <label class="toggle-switch"><input type="checkbox" id="toggle-power" checked onchange="toggleWidget('power', this.checked)"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="widget-toggle-item">
+          <span class="widget-toggle-label">🟢 Serveur Fabric</span>
+          <label class="toggle-switch"><input type="checkbox" id="toggle-fabric" checked onchange="toggleWidget('fabric', this.checked)"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="widget-toggle-item">
+          <span class="widget-toggle-label">🔵 Serveur Paper</span>
+          <label class="toggle-switch"><input type="checkbox" id="toggle-paper" checked onchange="toggleWidget('paper', this.checked)"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="widget-toggle-item">
+          <span class="widget-toggle-label">🔄 Bascule MC/AC</span>
+          <label class="toggle-switch"><input type="checkbox" id="toggle-switch-widget" checked onchange="toggleWidget('switch-widget', this.checked)"><span class="toggle-slider"></span></label>
+        </div>
+
+        <div class="widget-toggle-item">
+          <span class="widget-toggle-label">🏎️ Assetto Corsa</span>
+          <label class="toggle-switch"><input type="checkbox" id="toggle-assetto" checked onchange="toggleWidget('assetto', this.checked)"><span class="toggle-slider"></span></label>
+        </div>
+        <button class="customize-reset" onclick="resetWidgets()">🔄 Tout réafficher</button>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div id="tab-dashboard" class="tab active">
+        <h2>Tableau de bord</h2>
+
+        <div class="dashboard-widget" id="widget-switch-widget">
+          <div class="mode-indicator" id="mode-indicator">
+            <div>
+              <div class="mode-label">Mode actif</div>
+              <div class="mode-badge" id="mode-badge">...</div>
+            </div>
+            <button class="btn-switch" id="btn-switch" onclick="confirmSwitch()">🔄 Basculer</button>
+          </div>
+        </div>
+
+        <div class="cards">
+          <div class="dashboard-widget" id="widget-stats">
+            <div class="card" onclick="openChartModal()" style="cursor:pointer" title="Cliquer pour agrandir">
+              <h3>💾 RAM</h3>
+              <div class="bar-container"><div class="bar" id="ram-bar"></div></div>
+              <p id="ram-text"></p>
+              <canvas id="ram-sparkline" style="margin-top:6px;height:40px;max-height:40px;width:100%"></canvas>
+              <h3 style="margin-top:12px">⚡ CPU</h3>
+              <div class="bar-container"><div class="bar" id="cpu-bar"></div></div>
+              <p id="cpu-text"></p>
+              <canvas id="cpu-sparkline" style="margin-top:6px;height:40px;max-height:40px;width:100%"></canvas>
+            </div>
+          </div>
+          <div class="dashboard-widget" id="widget-temp">
+            <div class="card"><h3>🌡️ Température</h3><p id="temp-text" class="big-number"></p></div>
+          </div>
+          <div class="dashboard-widget" id="widget-disk">
+            <div class="card"><h3>💿 Disque</h3><div class="bar-container"><div class="bar" id="disk-bar"></div></div><p id="disk-text"></p></div>
+          </div>
+          <div class="dashboard-widget" id="widget-uptime">
+            <div class="card"><h3>⏱️ Uptime</h3><p id="uptime-text" class="big-number"></p></div>
+          </div>
+          <div class="dashboard-widget" id="widget-power">
+            <div class="card"><h3>🔌 Consommation</h3><p id="power-text" class="big-number"></p></div>
+          </div>
+          <div class="dashboard-widget" id="widget-fabric">
+            <div class="card"><h3>🟢 Fabric — Joueurs</h3><p id="fabric-players" class="big-number">—</p><h3 style="margin-top:12px">💾 RAM</h3><div class="bar-container"><div class="bar" id="fabric-ram-bar"></div></div><p id="fabric-ram-text"></p></div>
+          </div>
+          <div class="dashboard-widget" id="widget-paper">
+            <div class="card"><h3>🔵 Paper — Joueurs</h3><p id="paper-players" class="big-number">—</p><h3 style="margin-top:12px">💾 RAM</h3><div class="bar-container"><div class="bar" id="paper-ram-bar"></div></div><p id="paper-ram-text"></p></div>
+          </div>
+          <div class="dashboard-widget" id="widget-assetto">
+            <div class="card"><h3>🏎️ AC — Statut</h3><p id="ac-dash-status" class="big-number">—</p><h3 style="margin-top:12px">💾 RAM AC</h3><div class="bar-container"><div class="bar" id="ac-dash-ram-bar"></div></div><p id="ac-dash-ram-text"></p></div>
+          </div>
+        </div>
+
+        <div class="activity-card" id="widget-activity">
+          <div class="activity-title">
+            📋 Activité récente
+            <button onclick="clearActivity()">Effacer</button>
+          </div>
+          <div class="activity-timeline" id="activity-timeline">
+            <div class="activity-empty">Aucune activité récente</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FABRIC -->
+      <div id="tab-fabric" class="tab">
+        <h2>🟢 Fabric 1.20+</h2>
+        <div class="server-status"><span>Statut : </span><span id="fabric-status" class="status-badge">...</span></div>
+        <div class="server-actions">
+          <button class="btn-green" onclick="serverAction('fabric','start')">▶ Démarrer</button>
+          <button class="btn-red" onclick="confirmAction('fabric','stop')">⏹ Arrêter</button>
+          <button class="btn-orange" onclick="confirmAction('fabric','restart')">🔄 Redémarrer</button>
+        </div>
+        <div class="tabs-inner">
+          <button class="tab-inner-btn active" onclick="showInnerTab('fabric','console',this)">💻 Console</button>
+          <button class="tab-inner-btn" onclick="showInnerTab('fabric','config',this)">⚙️ Config</button>
+          <button class="tab-inner-btn" onclick="showInnerTab('fabric','whitelist',this)">📋 Whitelist</button>
+          <button class="tab-inner-btn" onclick="showInnerTab('fabric','ops',this)">👑 Ops</button>
+        </div>
+        <div id="fabric-inner-console" class="inner-tab active">
+          <div class="terminal-container">
+            <div class="terminal" id="fabric-logs"></div>
+            <div class="terminal-pause"><label><input type="checkbox" id="fabric-pause"> Pause scroll</label></div>
+          </div>
+          <div class="command-bar">
+            <input type="text" id="fabric-cmd" placeholder="Commande Minecraft..." />
+            <button onclick="sendCommand('fabric')">Envoyer</button>
+          </div>
+          <p id="fabric-cmd-response" class="cmd-response"></p>
+        </div>
+        <div id="fabric-inner-config" class="inner-tab">
+          <div class="mc-config-grid">
+            <div class="config-field"><label>MOTD</label><input type="text" id="fabric-motd" /></div>
+            <div class="slider-field">
+              <label>Max joueurs <span id="fabric-max-players-val">8</span></label>
+              <div class="slider-wrap">
+                  <input type="range" id="fabric-max-players" min="1" max="100" value="8" 
+                    oninput="this.nextElementSibling.value=this.value;document.getElementById('fabric-max-players-val').textContent=this.value" />
+                  <input type="number" class="slider-number-input" min="1" max="100" value="8"
+                    oninput="const r=document.getElementById('fabric-max-players');r.value=Math.min(Math.max(this.value,1),100);document.getElementById('fabric-max-players-val').textContent=r.value" />
+                </div>
+              <div class="slider-limits"><span>1</span><span>100</span></div>
+            </div>
+            <div class="slider-field">
+              <label>View distance <span id="fabric-view-distance-val">6</span></label>
+              <div class="slider-wrap">
+                  <input type="range" id="fabric-view-distance" min="2" max="32" value="6" 
+                    oninput="this.nextElementSibling.value=this.value;document.getElementById('fabric-view-distance-val').textContent=this.value" />
+                  <input type="number" class="slider-number-input" min="2" max="32" value="6"
+                    oninput="const r=document.getElementById('fabric-view-distance');r.value=Math.min(Math.max(this.value,2),32);document.getElementById('fabric-view-distance-val').textContent=r.value" />
+                </div>
+              <div class="slider-limits"><span>2</span><span>32</span></div>
+            </div>
+            <div class="slider-field">
+              <label>Simulation distance <span id="fabric-simulation-distance-val">4</span></label>
+              <div class="slider-wrap">
+                  <input type="range" id="fabric-simulation-distance" min="2" max="32" value="4" 
+                    oninput="this.nextElementSibling.value=this.value;document.getElementById('fabric-simulation-distance-val').textContent=this.value" />
+                  <input type="number" class="slider-number-input" min="2" max="32" value="4"
+                    oninput="const r=document.getElementById('fabric-simulation-distance');r.value=Math.min(Math.max(this.value,2),32);document.getElementById('fabric-simulation-distance-val').textContent=r.value" />
+                </div>
+              <div class="slider-limits"><span>2</span><span>32</span></div>
+            </div>
+            <div class="config-field"><label>Difficulté</label><select id="fabric-difficulty"><option value="peaceful">Peaceful</option><option value="easy">Easy</option><option value="normal">Normal</option><option value="hard">Hard</option></select></div>
+            <div class="config-field"><label>Mode de jeu</label><select id="fabric-gamemode"><option value="survival">Survival</option><option value="creative">Creative</option><option value="adventure">Adventure</option><option value="spectator">Spectator</option></select></div>
+            <div class="config-field"><label>PVP</label><select id="fabric-pvp"><option value="true">Activé</option><option value="false">Désactivé</option></select></div>
+            <div class="config-field"><label>Whitelist</label><select id="fabric-white-list"><option value="false">Désactivée</option><option value="true">Activée</option></select></div>
+            <div class="config-field"><label>Allow flight</label><select id="fabric-allow-flight"><option value="false">Non</option><option value="true">Oui</option></select></div>
+            <div class="slider-field">
+              <label>Spawn protection <span id="fabric-spawn-protection-val">16</span></label>
+              <div class="slider-wrap">
+                  <input type="range" id="fabric-spawn-protection" min="0" max="100" value="16" 
+                    oninput="this.nextElementSibling.value=this.value;document.getElementById('fabric-spawn-protection-val').textContent=this.value" />
+                  <input type="number" class="slider-number-input" min="0" max="100" value="16"
+                    oninput="const r=document.getElementById('fabric-spawn-protection');r.value=Math.min(Math.max(this.value,0),100);document.getElementById('fabric-spawn-protection-val').textContent=r.value" />
+                </div>
+              <div class="slider-limits"><span>0</span><span>100</span></div>
+            </div>
+          </div>
+          <button class="btn-green" onclick="saveMCConfig('fabric')" style="margin-top:16px">💾 Sauvegarder</button>
+          <p id="fabric-config-msg" class="cmd-response"></p>
+        </div>
+        <div id="fabric-inner-whitelist" class="inner-tab">
+          <div class="player-manager">
+            <div class="player-add"><input type="text" id="fabric-whitelist-input" placeholder="Nom du joueur..." /><button class="btn-green" onclick="addToWhitelist('fabric')">➕ Ajouter</button></div>
+            <div id="fabric-whitelist-list" class="player-list"></div>
+          </div>
+          <p id="fabric-whitelist-msg" class="cmd-response"></p>
+        </div>
+        <div id="fabric-inner-ops" class="inner-tab">
+          <div class="player-manager">
+            <div class="player-add"><input type="text" id="fabric-ops-input" placeholder="Nom du joueur..." /><button class="btn-green" onclick="addOp('fabric')">👑 Op</button></div>
+            <div id="fabric-ops-list" class="player-list"></div>
+          </div>
+          <p id="fabric-ops-msg" class="cmd-response"></p>
+        </div>
+      </div>
+
+      <!-- PAPER -->
+      <div id="tab-paper" class="tab">
+        <h2>🔵 Paper 1.17.1</h2>
+        <div class="server-status"><span>Statut : </span><span id="paper-status" class="status-badge">...</span></div>
+        <div class="server-actions">
+          <button class="btn-green" onclick="serverAction('paper','start')">▶ Démarrer</button>
+          <button class="btn-red" onclick="confirmAction('paper','stop')">⏹ Arrêter</button>
+          <button class="btn-orange" onclick="confirmAction('paper','restart')">🔄 Redémarrer</button>
+        </div>
+        <div class="tabs-inner">
+          <button class="tab-inner-btn active" onclick="showInnerTab('paper','console',this)">💻 Console</button>
+          <button class="tab-inner-btn" onclick="showInnerTab('paper','config',this)">⚙️ Config</button>
+          <button class="tab-inner-btn" onclick="showInnerTab('paper','whitelist',this)">📋 Whitelist</button>
+          <button class="tab-inner-btn" onclick="showInnerTab('paper','ops',this)">👑 Ops</button>
+        </div>
+        <div id="paper-inner-console" class="inner-tab active">
+          <div class="terminal-container">
+            <div class="terminal" id="paper-logs"></div>
+            <div class="terminal-pause"><label><input type="checkbox" id="paper-pause"> Pause scroll</label></div>
+          </div>
+          <div class="command-bar">
+            <input type="text" id="paper-cmd" placeholder="Commande Minecraft..." />
+            <button onclick="sendCommand('paper')">Envoyer</button>
+          </div>
+          <p id="paper-cmd-response" class="cmd-response"></p>
+        </div>
+        <div id="paper-inner-config" class="inner-tab">
+          <div class="mc-config-grid">
+            <div class="config-field"><label>MOTD</label><input type="text" id="paper-motd" /></div>
+            <div class="slider-field">
+              <label>Max joueurs <span id="paper-max-players-val">8</span></label>
+              <div class="slider-wrap">
+                  <input type="range" id="paper-max-players" min="1" max="100" value="8" 
+                    oninput="this.nextElementSibling.value=this.value;document.getElementById('paper-max-players-val').textContent=this.value" />
+                  <input type="number" class="slider-number-input" min="1" max="100" value="8"
+                    oninput="const r=document.getElementById('paper-max-players');r.value=Math.min(Math.max(this.value,1),100);document.getElementById('paper-max-players-val').textContent=r.value" />
+                </div>
+              <div class="slider-limits"><span>1</span><span>100</span></div>
+            </div>
+            <div class="slider-field">
+              <label>View distance <span id="paper-view-distance-val">6</span></label>
+              <div class="slider-wrap">
+                  <input type="range" id="paper-view-distance" min="2" max="32" value="6" 
+                    oninput="this.nextElementSibling.value=this.value;document.getElementById('paper-view-distance-val').textContent=this.value" />
+                  <input type="number" class="slider-number-input" min="2" max="32" value="6"
+                    oninput="const r=document.getElementById('paper-view-distance');r.value=Math.min(Math.max(this.value,2),32);document.getElementById('paper-view-distance-val').textContent=r.value" />
+                </div>
+              <div class="slider-limits"><span>2</span><span>32</span></div>
+            </div>
+            <div class="slider-field">
+              <label>Simulation distance <span id="paper-simulation-distance-val">4</span></label>
+              <div class="slider-wrap">
+                  <input type="range" id="paper-simulation-distance" min="2" max="32" value="4" 
+                    oninput="this.nextElementSibling.value=this.value;document.getElementById('paper-simulation-distance-val').textContent=this.value" />
+                  <input type="number" class="slider-number-input" min="2" max="32" value="4"
+                    oninput="const r=document.getElementById('paper-simulation-distance');r.value=Math.min(Math.max(this.value,2),32);document.getElementById('paper-simulation-distance-val').textContent=r.value" />
+                </div>
+              <div class="slider-limits"><span>2</span><span>32</span></div>
+            </div>
+            <div class="config-field"><label>Difficulté</label><select id="paper-difficulty"><option value="peaceful">Peaceful</option><option value="easy">Easy</option><option value="normal">Normal</option><option value="hard">Hard</option></select></div>
+            <div class="config-field"><label>Mode de jeu</label><select id="paper-gamemode"><option value="survival">Survival</option><option value="creative">Creative</option><option value="adventure">Adventure</option><option value="spectator">Spectator</option></select></div>
+            <div class="config-field"><label>PVP</label><select id="paper-pvp"><option value="true">Activé</option><option value="false">Désactivé</option></select></div>
+            <div class="config-field"><label>Whitelist</label><select id="paper-white-list"><option value="false">Désactivée</option><option value="true">Activée</option></select></div>
+            <div class="config-field"><label>Allow flight</label><select id="paper-allow-flight"><option value="false">Non</option><option value="true">Oui</option></select></div>
+            <div class="slider-field">
+              <label>Spawn protection <span id="paper-spawn-protection-val">16</span></label>
+              <div class="slider-wrap">
+                  <input type="range" id="paper-spawn-protection" min="0" max="100" value="16" 
+                    oninput="this.nextElementSibling.value=this.value;document.getElementById('paper-spawn-protection-val').textContent=this.value" />
+                  <input type="number" class="slider-number-input" min="0" max="100" value="16"
+                    oninput="const r=document.getElementById('paper-spawn-protection');r.value=Math.min(Math.max(this.value,0),100);document.getElementById('paper-spawn-protection-val').textContent=r.value" />
+                </div>
+              <div class="slider-limits"><span>0</span><span>100</span></div>
+            </div>
+          </div>
+          <button class="btn-green" onclick="saveMCConfig('paper')" style="margin-top:16px">💾 Sauvegarder</button>
+          <p id="paper-config-msg" class="cmd-response"></p>
+        </div>
+        <div id="paper-inner-whitelist" class="inner-tab">
+          <div class="player-manager">
+            <div class="player-add"><input type="text" id="paper-whitelist-input" placeholder="Nom du joueur..." /><button class="btn-green" onclick="addToWhitelist('paper')">➕ Ajouter</button></div>
+            <div id="paper-whitelist-list" class="player-list"></div>
+          </div>
+          <p id="paper-whitelist-msg" class="cmd-response"></p>
+        </div>
+        <div id="paper-inner-ops" class="inner-tab">
+          <div class="player-manager">
+            <div class="player-add"><input type="text" id="paper-ops-input" placeholder="Nom du joueur..." /><button class="btn-green" onclick="addOp('paper')">👑 Op</button></div>
+            <div id="paper-ops-list" class="player-list"></div>
+          </div>
+          <p id="paper-ops-msg" class="cmd-response"></p>
+        </div>
+      </div>
+
+      <!-- ASSETTO CORSA -->
+      <div id="tab-assetto" class="tab">
+        <h2>🏎️ Assetto Corsa</h2>
+        <div class="ac-header">
+          <div class="ac-status-bar">
+            <div class="ac-status-item"><span class="ac-status-label">Statut</span><span id="ac-status" class="status-badge">...</span></div>
+            <div class="ac-status-item"><span class="ac-status-label">RAM</span><span id="ac-ram" class="ac-stat-value">—</span></div>
+            <div class="ac-status-item"><span class="ac-status-label">Joueurs</span><span id="ac-player-count" class="ac-stat-value">—</span></div>
+          </div>
+          <div class="server-actions">
+            <button class="btn-green" onclick="confirmSwitch('assetto')">🏎️ Activer AC</button>
+            <button class="btn-red" onclick="confirmSwitch('minecraft')">⛏️ Revenir MC</button>
+            <button class="btn-orange" onclick="restartAC()">🔄 Redémarrer</button>
+          </div>
+        </div>
+        <div class="tabs-inner">
+          <button class="tab-inner-btn active" onclick="showInnerTab('ac','console',this)">💻 Console</button>
+          <button class="tab-inner-btn" onclick="showInnerTab('ac','config',this)">⚙️ Config</button>
+          <button class="tab-inner-btn" onclick="showInnerTab('ac','mods',this)">📦 Mods</button>
+        </div>
+        <div id="ac-inner-console" class="inner-tab active">
+          <div class="ac-players-bar" id="ac-players-bar">
+            <span style="color:#aaa">Joueurs : </span><span id="ac-players-list">—</span>
+          </div>
+          <div class="terminal-container">
+            <div class="terminal" id="assetto-logs"></div>
+            <div class="terminal-pause"><label><input type="checkbox" id="assetto-pause"> Pause scroll</label></div>
+          </div>
+        </div>
+        <div id="ac-inner-config" class="inner-tab">
+          <div class="ac-config-layout">
+            <div class="ac-config-left">
+              <div class="settings-section"><h3>🏷️ Nom</h3><input type="text" id="ac-name" /></div>
+              <div class="settings-section"><h3>🔑 Mot de passe</h3><input type="text" id="ac-password" placeholder="Vide = public" /></div>
+              <div class="settings-section"><h3>👥 Slots max</h3><input type="number" id="ac-max-clients" min="1" max="10" /></div>
+              <div class="settings-section"><h3>☀️ Heure (SUN_ANGLE)</h3><input type="number" id="ac-sun-angle" min="-80" max="80" /><small style="color:#aaa">-80=nuit, 16=midi, 80=soir</small></div>
+              <div class="settings-section">
+                <h3>🏁 Circuit</h3>
+                <select id="ac-track" onchange="loadTrackConfigs()"></select>
+                <select id="ac-track-config" style="margin-top:8px"></select>
+                <p id="ac-track-selected" class="cmd-response"></p>
+              </div>
+              <div class="ac-track-preview" id="ac-track-preview">
+                <img id="ac-track-img" src="" alt="" style="display:none" />
+                <div id="ac-track-name" class="ac-track-name"></div>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:8px;margin-bottom:16px;position:sticky;top:0;background:#0f0f1a;padding:8px 0;z-index:10">
+	       <button class="btn-green" onclick="saveACConfig()">💾 Sauvegarder</button>
+	       <button class="btn-orange" onclick="restartAC()">🔄 Appliquer et redémarrer</button>
+       	       <p id="ac-config-msg" class="cmd-response" style="margin:0;align-self:center"></p>
+	      </div>
+            </div>
+            <div class="ac-config-right">
+              <div class="settings-section" style="max-width:100%">
+                <h3>🚗 Voitures autorisées</h3>
+                <p style="font-size:0.8rem;color:#4a5568;margin-bottom:8px">Utilise le <strong style="color:#fb923c">Navigateur AC</strong> pour sélectionner des voitures.</p>
+                <div id="ac-cars-list" style="max-height:400px;overflow-y:auto"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="ac-inner-mods" class="inner-tab">
+          <div class="mods-layout">
+            <div class="mod-upload-box">
+              <h3>📦 Voiture</h3>
+              <div class="drop-zone" id="drop-car" onclick="document.getElementById('upload-car').click()">
+                <div class="drop-icon">🚗</div>
+                <p>Glisser-déposer un .zip</p>
+                <input type="file" id="upload-car" accept=".zip" style="display:none" onchange="uploadMod('car', this)" />
+              </div>
+              <div id="upload-car-progress" class="upload-progress" style="display:none">
+                <div class="progress-bar"><div class="progress-fill" id="car-progress-fill"></div></div>
+                <p id="car-progress-text"></p>
+              </div>
+            </div>
+            <div class="mod-upload-box">
+              <h3>🏁 Circuit</h3>
+              <div class="drop-zone" id="drop-track" onclick="document.getElementById('upload-track').click()">
+                <div class="drop-icon">🏁</div>
+                <p>Glisser-déposer un .zip</p>
+                <input type="file" id="upload-track" accept=".zip" style="display:none" onchange="uploadMod('track', this)" />
+              </div>
+              <div id="upload-track-progress" class="upload-progress" style="display:none">
+                <div class="progress-bar"><div class="progress-fill" id="track-progress-fill"></div></div>
+                <p id="track-progress-text"></p>
+              </div>
+            </div>
+          </div>
+          <div class="mods-lists">
+            <div class="mods-list-section">
+              <h3>🚗 Voitures (<span id="cars-count">0</span>)</h3>
+              <input type="text" placeholder="Rechercher..." oninput="filterModList('cars', this.value)" style="margin-bottom:8px;padding:6px 10px;background:#0d1117;border:1px solid #1e3a5f;border-radius:6px;color:#eee;width:100%" />
+              <div id="cars-mod-list" class="mods-scroll"></div>
+            </div>
+            <div class="mods-list-section">
+              <h3>🏁 Circuits (<span id="tracks-count">0</span>)</h3>
+              <input type="text" placeholder="Rechercher..." oninput="filterModList('tracks', this.value)" style="margin-bottom:8px;padding:6px 10px;background:#0d1117;border:1px solid #1e3a5f;border-radius:6px;color:#eee;width:100%" />
+              <div id="tracks-mod-list" class="mods-scroll"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NAVIGATEUR AC -->
+      <div id="tab-ac-browser" class="tab">
+        <h2>🎨 Navigateur Assetto Corsa</h2>
+        <div class="tabs-inner">
+          <button class="tab-inner-btn active" onclick="showBrowserTab('cars', this)">🚗 Voitures</button>
+          <button class="tab-inner-btn" onclick="showBrowserTab('tracks', this)">🏁 Circuits</button>
+        </div>
+
+        <!-- Voitures -->
+        <div id="browser-inner-cars" class="inner-tab active">
+          <div class="browser-toolbar">
+            <input type="text" id="car-search-input" placeholder="🔍 Rechercher une voiture..." oninput="carSearchQuery=this.value.toLowerCase();renderCarsBrowser()" />
+            <span id="cars-browser-count" class="browser-count"></span>
+            <button class="btn-green" onclick="applyBrowserSelection()" style="margin-left:auto">✅ Appliquer sélection (<span id="selected-cars-count">0</span>)</button>
+          </div>
+          <div class="browser-filters">
+            <div class="filter-group">
+              <span class="filter-label">Marque</span>
+              <div id="car-brand-filters" class="filter-pills"></div>
+            </div>
+            <div class="filter-group">
+              <span class="filter-label">Catégorie</span>
+              <div id="car-category-filters" class="filter-pills"></div>
+            </div>
+          </div>
+          <div id="cars-browser-grid" class="browser-grid"></div>
+        </div>
+
+        <!-- Circuits -->
+        <div id="browser-inner-tracks" class="inner-tab">
+          <div class="browser-toolbar">
+            <input type="text" id="track-search-input" placeholder="🔍 Rechercher un circuit..." oninput="trackSearchQuery=this.value.toLowerCase();renderTracksBrowser()" />
+            <span id="tracks-browser-count" class="browser-count"></span>
+          </div>
+          <div class="browser-filters">
+            <div class="filter-group">
+              <span class="filter-label">Pays</span>
+              <div id="track-country-filters" class="filter-pills"></div>
+            </div>
+          </div>
+          <div id="tracks-browser-grid" class="browser-grid tracks-grid"></div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div id="tab-settings" class="tab">
+        <h2>Paramètres</h2>
+        <div class="settings-section">
+          <h3>💡 Tarif électrique</h3>
+          <input type="number" id="rate-input" step="0.001" placeholder="€/kWh (ex: 0.206)" />
+          <button onclick="saveSettings()">Sauvegarder</button>
+        </div>
+        <div class="settings-section">
+          <h3>🔑 Changer le mot de passe</h3>
+          <input type="password" id="new-password" placeholder="Nouveau mot de passe (min 6 caractères)" />
+          <button onclick="changePassword()">Changer</button>
+        </div>
+        <div class="settings-section">
+          <h3>ℹ️ Informations système</h3>
+          <button onclick="loadSysinfo()">Afficher</button>
+          <pre id="sysinfo-output"></pre>
+        </div>
+        <p id="settings-msg" class="cmd-response"></p>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Modal confirmation bascule -->
+  <div id="modal-switch" class="modal" style="display:none">
+    <div class="modal-box">
+      <h3 id="modal-title">Confirmer la bascule</h3>
+      <p id="modal-text"></p>
+      <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end">
+        <button class="btn-red" onclick="closeModal()">Annuler</button>
+       <button class="btn-green" id="modal-confirm-btn">Confirmer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview voiture overlay -->
+  <div id="car-preview-overlay" class="car-preview-overlay" style="display:none"></div>
+
+  <!-- Modal graphique agrandi -->
+  <div id="modal-chart" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:1000;justify-content:center;align-items:center">
+    <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;padding:24px;width:90%;max-width:800px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 style="color:var(--text-primary)">📊 Historique RAM &amp; CPU (30 min)</h3>
+        <button onclick="document.getElementById('modal-chart').style.display='none'" style="background:none;border:none;color:var(--text-secondary);font-size:1.5rem;cursor:pointer">✕</button>
+      </div>
+      <canvas id="chart-history" style="height:300px;max-height:300px;width:100%"></canvas>
+    </div>
+  </div>
+  <div id="toast-container"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+  <script src="ac-browser.js"></script>
+</body>
+</html>

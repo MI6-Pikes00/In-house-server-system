@@ -1,0 +1,29 @@
+# ==================== SECRETS ====================
+panel/config.json
+panel/.env
+panel/ssl/
+panel/sessions/
+
+# ==================== NODE ====================
+panel/node_modules/
+npm-debug.log*
+
+# ==================== ASSETTO CORSA ====================
+assetto/cfg/server_cfg.ini
+assetto/cfg/entry_list.ini
+
+# ==================== CERTIFICATS ====================
+*.pem
+*.key
+*.crt
+*.p12
+
+# ==================== LOGS ====================
+*.log
+logs/
+
+# ==================== SYSTEME ====================
+.DS_Store
+Thumbs.db
+*.tmp
+.bash_history
