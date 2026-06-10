@@ -1,4 +1,4 @@
-# 🎮 LiteCorps — In-House Server System
+# 🎮 In-House Server System
 
 Infrastructure home server multi-jeux tournant sur Debian, gérant deux serveurs Minecraft et un serveur Assetto Corsa, avec un panel web d'administration complet.
 
