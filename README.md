@@ -28,7 +28,7 @@ Infrastructure home server multi-jeux tournant sur Debian, gérant deux serveurs
 
 ## ⚙️ Prérequis
 
-- Debian 12 (Trixie) ou supérieur
+- Debian 12 (Bookworm) ou 13 (Trixie)
 - Node.js 20+
 - Java 21 (OpenJDK)
 - Wine 11+ (WineHQ stable)
@@ -51,7 +51,7 @@ cp panel/.env.example panel/.env
 cp assetto/cfg/server_cfg.ini.example /opt/assetto/cfg/server_cfg.ini
 ```
 
-Édite chaque fichier pour y mettre tes vraies valeurs.
+Édite chaque fichier pour y mettre tes vraies valeurs. Dans `config.json`, `panel.host` est l'adresse d'écoute du panel : mets l'IP LAN du serveur (sans elle, le panel n'écoute qu'en local). Ne mets jamais `0.0.0.0`.
 
 ### 3. Installer les dépendances Node.js
 
@@ -72,6 +72,8 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 
 ### 5. Installer les services systemd
 
+Les jeux et le panel tournent sous des comptes dédiés (`minecraft`, `assetto`, `panel`, `gpgames`, groupe `gameservers`). Crée-les d'abord : étape 6 de [docs/SECURITE.md](docs/SECURITE.md).
+
 ```bash
 sudo cp systemd/*.service /etc/systemd/system/
 sudo systemctl daemon-reload
@@ -90,13 +92,13 @@ sudo chmod +x /usr/local/bin/switch-to-minecraft.sh
 
 ### 7. Création de serveurs depuis le panel
 
-Les serveurs créés vivent dans `/srv/games/<id>` et tournent via des unités `gp-<id>` sous l'utilisateur du panel. Le script `gp-service` est le seul appel root.
+Les serveurs créés vivent dans `/srv/games/<id>` et tournent via des unités `gp-<id>` sous le compte `gpgames`, sandboxées. Le script `gp-service` crée ce compte au premier appel.
 
 ```bash
 sudo install -m 755 scripts/gp-service.sh /usr/local/bin/gp-service
-echo 'user ALL=(root) NOPASSWD: /usr/local/bin/gp-service' | sudo tee /etc/sudoers.d/gp-service
-sudo visudo -c
 ```
+
+La règle sudo du panel (liste fermée) est dans [docs/SECURITE.md](docs/SECURITE.md), étape 6.
 
 Pour Assetto Corsa, Le Mans Ultimate et Farming Simulator 17, installe SteamCMD (`sudo apt install steamcmd`, dépôt non-free, i386 activé) et Wine. Le compte Steam, son mot de passe et le code Steam Guard sont demandés à l'installation et ne sont pas enregistrés.
 
@@ -112,6 +114,10 @@ Les app IDs Steam et les exécutables sont réglables dans `config.json` :
 ```
 
 L'app ID du serveur dédié Le Mans Ultimate n'est pas renseigné : sans lui, le serveur est créé vide et tu déposes ses fichiers dans l'onglet Fichiers.
+
+## 🔒 Sécurité
+
+Plan de durcissement complet (ports, SSH, UFW, WireGuard, Fail2ban, sandboxing, alertes ntfy, sauvegardes) : [docs/SECURITE.md](docs/SECURITE.md).
 
 ## 📄 Licence
 
