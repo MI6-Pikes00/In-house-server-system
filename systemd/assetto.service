@@ -3,9 +3,11 @@ Description=Assetto Corsa Dedicated Server
 After=network.target
 
 [Service]
-User=user
+User=assetto
+Group=gameservers
 WorkingDirectory=/opt/assetto
-Environment=WINEPREFIX=/home/user/.wine64
+Environment=WINEPREFIX=/opt/assetto/.wine64
+Environment=HOME=/opt/assetto
 Environment=DISPLAY=
 ExecStart=/usr/bin/wine /opt/assetto/original.exe
 Restart=on-failure
@@ -15,6 +17,17 @@ StandardError=journal
 TimeoutStopSec=15
 KillMode=mixed
 KillSignal=SIGTERM
+# Sandboxing : compte sans sudo ni SSH, écriture limitée à /opt/assetto.
+UMask=0007
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/opt/assetto
+RestrictSUIDSGID=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
 
 [Install]
 WantedBy=multi-user.target

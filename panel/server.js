@@ -5,7 +5,8 @@ const { Rcon } = require('rcon-client');
 const fs = require('fs');
 const path = require('path');
 const { exec, execFile, spawn } = require('child_process');
-main
+const crypto = require('crypto');
+const os = require('os');
 const http = require('http');
 const https = require('https');
 const ini = require('ini');
@@ -57,6 +58,8 @@ app.post('/api/login', (req, res) => {
     if (!loginAttempts[ip]) loginAttempts[ip] = { count: 0, lastAttempt: Date.now() };
     loginAttempts[ip].count++;
     loginAttempts[ip].lastAttempt = Date.now();
+    // Lu par la jail Fail2ban garage-panel (docs/SECURITE.md).
+    console.warn(new Date().toISOString() + ' Echec connexion panel depuis ' + ip);
     res.status(401).json({ error: 'Identifiants incorrects' });
   }
 });
@@ -760,6 +763,8 @@ wss.on('connection', (ws, req) => {
   ws.on('close', () => { if (tail) tail.kill(); });
 });
 
-server.listen(config.panel.port, '0.0.0.0', () => {
-  console.log('Panel demarre sur port ' + config.panel.port);
+// Jamais 0.0.0.0 par défaut : le panel ne doit être joignable que depuis le LAN ou WireGuard.
+const HOST = config.panel.host || '127.0.0.1';
+server.listen(config.panel.port, HOST, () => {
+  console.log('Panel demarre sur ' + HOST + ':' + config.panel.port);
 });

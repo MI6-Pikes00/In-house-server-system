@@ -1,5 +1,6 @@
 {
   "panel": {
+    "host": "192.168.0.55",
     "port": 4444,
     "username": "admin",
     "password": "votre_mot_de_passe_ici",

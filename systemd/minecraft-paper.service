@@ -3,7 +3,8 @@ Description=Minecraft Paper 1.17.1 Server
 After=network.target
 
 [Service]
-User=user
+User=minecraft
+Group=gameservers
 WorkingDirectory=/opt/minecraft/paper
 ExecStart=/usr/bin/java \
   -Xms512M \
@@ -27,6 +28,17 @@ Restart=on-failure
 RestartSec=5s
 StandardOutput=journal
 StandardError=journal
+# Sandboxing : compte sans sudo ni SSH, écriture limitée à /opt/minecraft.
+UMask=0007
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/opt/minecraft
+RestrictSUIDSGID=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
 
 [Install]
 WantedBy=multi-user.target

@@ -3,11 +3,17 @@ Description=Minecraft Web Panel
 After=network.target
 
 [Service]
-User=user
+User=panel
+Group=gameservers
+# journalctl des unités assetto et gp-*.
+SupplementaryGroups=systemd-journal
 WorkingDirectory=/opt/minecraft-panel
 ExecStart=/usr/bin/node server.js
 Restart=on-failure
 RestartSec=5s
+# Fichiers créés (jeux, envois) lisibles et modifiables par le groupe gameservers, rien pour les autres.
+# Pas de NoNewPrivileges ni ProtectSystem ici : le panel passe par sudo (gp-service, bascule).
+UMask=0007
 StandardOutput=append:/var/log/minecraft-panel/auth.log
 StandardError=append:/var/log/minecraft-panel/auth.log
 
