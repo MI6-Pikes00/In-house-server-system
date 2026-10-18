@@ -13,15 +13,13 @@ Infrastructure home server multi-jeux tournant sur Debian, gérant deux serveurs
 
 ## 📋 Fonctionnalités du panel
 
-- Dashboard temps réel (RAM, CPU, température, disque, uptime)
-- Graphiques sparkline RAM/CPU avec historique 30 minutes
-- Gestion des serveurs Minecraft (console, config, whitelist, ops)
-- Navigateur Assetto Corsa avec images des voitures et circuits
-- Upload de mods AC par drag and drop
-- Bascule exclusive Minecraft ↔ Assetto Corsa avec popup de chargement
-- Notifications toast et journal d'activité récente
-- Dark/Light mode
-- Dashboard personnalisable (widgets activables/désactivables)
+- Vue d'ensemble temps réel : bande mémoire par serveur, graphes CPU et température, disque, consommation, uptime
+- Gestion des serveurs Minecraft (console RCON, joueurs et expulsion, config, whitelist, ops), état MSH « en veille »
+- Assetto Corsa : console de logs, piste et configuration, voitures autorisées, upload de voitures et circuits (.zip)
+- Bascule exclusive Minecraft ↔ Assetto Corsa
+- Le Mans Ultimate et Farming Simulator 17 affichés dans l'interface, backend à venir
+- Journal des actions du panel, notifications toast
+- Thème Auto / Nuit / Jour
 - HTTPS avec certificat auto-signé
 
 ## ⚙️ Prérequis
