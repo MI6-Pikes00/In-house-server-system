@@ -3,6 +3,7 @@ panel/config.json
 panel/.env
 panel/ssl/
 panel/sessions/
+panel/servers.json
 
 # ==================== NODE ====================
 panel/node_modules/

@@ -13,15 +13,17 @@ Infrastructure home server multi-jeux tournant sur Debian, gérant deux serveurs
 
 ## 📋 Fonctionnalités du panel
 
-- Dashboard temps réel (RAM, CPU, température, disque, uptime)
-- Graphiques sparkline RAM/CPU avec historique 30 minutes
-- Gestion des serveurs Minecraft (console, config, whitelist, ops)
-- Navigateur Assetto Corsa avec images des voitures et circuits
-- Upload de mods AC par drag and drop
-- Bascule exclusive Minecraft ↔ Assetto Corsa avec popup de chargement
-- Notifications toast et journal d'activité récente
-- Dark/Light mode
-- Dashboard personnalisable (widgets activables/désactivables)
+- Vue d'ensemble temps réel : bande mémoire par serveur, graphes CPU et température, disque, consommation, uptime
+- Gestion des serveurs Minecraft (console RCON, joueurs et expulsion, config, whitelist, ops), état MSH « en veille »
+- Assetto Corsa : console de logs, piste et configuration, voitures autorisées, upload de voitures et circuits (.zip)
+- Bascule exclusive Minecraft ↔ Assetto Corsa
+- Création de serveurs depuis le panel : Minecraft (Paper ou Fabric téléchargé automatiquement), Assetto Corsa, Le Mans Ultimate et Farming Simulator 17 (SteamCMD avec le compte qui possède le jeu), suivi de l'installation en direct
+- Suppression des serveurs créés (service et dossier)
+- Gestionnaire de fichiers par serveur : navigation, envoi (glisser-déposer, 2 Go max), téléchargement, création de dossiers, suppression
+- Images des voitures et circuits Assetto Corsa dans les réglages
+- Historique 30 minutes du CPU et de la température
+- Journal des actions du panel, notifications toast
+- Thème Auto / Nuit / Jour
 - HTTPS avec certificat auto-signé
 
 ## ⚙️ Prérequis
@@ -85,6 +87,31 @@ sudo cp scripts/switch-to-minecraft.sh /usr/local/bin/
 sudo chmod +x /usr/local/bin/switch-to-assetto.sh
 sudo chmod +x /usr/local/bin/switch-to-minecraft.sh
 ```
+
+### 7. Création de serveurs depuis le panel
+
+Les serveurs créés vivent dans `/srv/games/<id>` et tournent via des unités `gp-<id>` sous l'utilisateur du panel. Le script `gp-service` est le seul appel root.
+
+```bash
+sudo install -m 755 scripts/gp-service.sh /usr/local/bin/gp-service
+echo 'user ALL=(root) NOPASSWD: /usr/local/bin/gp-service' | sudo tee /etc/sudoers.d/gp-service
+sudo visudo -c
+```
+
+Pour Assetto Corsa, Le Mans Ultimate et Farming Simulator 17, installe SteamCMD (`sudo apt install steamcmd`, dépôt non-free, i386 activé) et Wine. Le compte Steam, son mot de passe et le code Steam Guard sont demandés à l'installation et ne sont pas enregistrés.
+
+Les app IDs Steam et les exécutables sont réglables dans `config.json` :
+
+```json
+"steamcmd": "/usr/games/steamcmd",
+"games": {
+  "ac":  { "steamAppId": 302550, "platform": "linux",   "exe": "acServer", "contentDir": "/opt/assetto/content" },
+  "lmu": { "steamAppId": null,   "platform": "windows", "exe": "LMU Dedicated.exe" },
+  "fs":  { "steamAppId": 447020, "platform": "windows", "exe": "dedicatedServer.exe" }
+}
+```
+
+L'app ID du serveur dédié Le Mans Ultimate n'est pas renseigné : sans lui, le serveur est créé vide et tu déposes ses fichiers dans l'onglet Fichiers.
 
 ## 📄 Licence
 
