@@ -33,7 +33,6 @@ const sessionMiddleware = session({
 });
 app.use(sessionMiddleware);
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/ac-preview', express.static('/opt/assetto/content'));
 
 const loginAttempts = {};
 function checkBruteForce(ip) {
@@ -679,10 +678,14 @@ app.post('/api/ac/upload/:type', requireAuth, (req, res) => {
     if (err) return res.status(500).json({ error: err.message });
     if (!req.file) return res.status(400).json({ error: 'Aucun fichier recu' });
     const dest = type==='car'?'/opt/assetto/content/cars':'/opt/assetto/content/tracks';
-    execFile('unzip', ['-o', req.file.path, '-d', dest], (err2,stdout,stderr) => {
-      fs.rmSync(req.file.path, { force: true });
-      if (err2) return res.status(500).json({ error: stderr });
-      res.json({ success: true, message: 'Mod installe dans '+dest });
+    execFile('zipinfo', [req.file.path], (err1,list,stderr1) => {
+      if (err1) { fs.rmSync(req.file.path, { force: true }); return res.status(500).json({ error: stderr1 || err1.message }); }
+      if (/^l/m.test(list)) { fs.rmSync(req.file.path, { force: true }); return res.status(400).json({ error: 'Archive refusée : elle contient des liens symboliques' }); }
+      execFile('unzip', ['-o', req.file.path, '-d', dest], (err2,stdout,stderr) => {
+        fs.rmSync(req.file.path, { force: true });
+        if (err2) return res.status(500).json({ error: stderr });
+        res.json({ success: true, message: 'Mod installe dans '+dest });
+      });
     });
   });
 });
