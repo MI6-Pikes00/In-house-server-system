@@ -4,7 +4,7 @@ const { WebSocketServer } = require('ws');
 const { Rcon } = require('rcon-client');
 const fs = require('fs');
 const path = require('path');
-const { exec, spawn } = require('child_process');
+const { exec, execFile, spawn } = require('child_process');
 const http = require('http');
 const https = require('https');
 const ini = require('ini');
@@ -18,17 +18,18 @@ const sslOptions = {
   cert: fs.readFileSync('./ssl/cert.pem')
 };
 const server = https.createServer(sslOptions, app);
-const wss = new WebSocketServer({ server });
+const wss = new WebSocketServer({ noServer: true });
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(session({
+const sessionMiddleware = session({
   store: new FileStore({ path: './sessions', ttl: 86400, retries: 0 }),
   secret: config.panel.sessionSecret,
   resave: false,
   saveUninitialized: false,
   cookie: { httpOnly: true, maxAge: 86400000 }
-}));
+});
+app.use(sessionMiddleware);
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/ac-preview', express.static('/opt/assetto/content'));
 
@@ -436,7 +437,7 @@ const acModStorage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, req.params.type==='car'?'/opt/assetto/content/cars':'/opt/assetto/content/tracks'),
   filename: (req, file, cb) => cb(null, file.originalname)
 });
-const acModUpload = multer({ storage: acModStorage, fileFilter: (req,file,cb) => file.originalname.endsWith('.zip')?cb(null,true):cb(new Error('Seuls .zip')), limits: { fileSize: 500*1024*1024 } });
+const acModUpload = multer({ storage: acModStorage, fileFilter: (req,file,cb) => { const n = file.originalname; if (!n.endsWith('.zip')) return cb(new Error('Seuls .zip')); if (n.includes('/') || n.includes('..')) return cb(new Error('Nom de fichier invalide')); cb(null,true); }, limits: { fileSize: 500*1024*1024 } });
 
 app.post('/api/ac/upload/:type', requireAuth, (req, res) => {
   const { type } = req.params;
@@ -445,7 +446,8 @@ app.post('/api/ac/upload/:type', requireAuth, (req, res) => {
     if (err) return res.status(500).json({ error: err.message });
     if (!req.file) return res.status(400).json({ error: 'Aucun fichier recu' });
     const dest = type==='car'?'/opt/assetto/content/cars':'/opt/assetto/content/tracks';
-    exec('cd "'+dest+'" && unzip -o "'+req.file.originalname+'" && rm "'+req.file.originalname+'"', (err2,stdout,stderr) => {
+    execFile('unzip', ['-o', req.file.path, '-d', dest], (err2,stdout,stderr) => {
+      fs.rmSync(req.file.path, { force: true });
       if (err2) return res.status(500).json({ error: stderr });
       res.json({ success: true, message: 'Mod installe dans '+dest });
     });
@@ -489,6 +491,16 @@ setInterval(async () => {
 app.get('/api/sysinfo', requireAuth, (req, res) => {
   exec('cat /etc/debian_version && java -version 2>&1 && node -v', (err, stdout, stderr) => {
     res.json({ info: stdout+stderr });
+  });
+});
+
+server.on('upgrade', (req, socket, head) => {
+  sessionMiddleware(req, {}, () => {
+    if (!req.session || !req.session.authenticated) {
+      socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+      return socket.destroy();
+    }
+    wss.handleUpgrade(req, socket, head, (ws) => wss.emit('connection', ws, req));
   });
 });
 
