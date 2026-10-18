@@ -5,6 +5,12 @@
     "password": "votre_mot_de_passe_ici",
     "sessionSecret": "changez_cette_valeur_par_une_chaine_aleatoire_longue"
   },
+  "steamcmd": "/usr/games/steamcmd",
+  "games": {
+    "ac": { "steamAppId": 302550, "platform": "linux", "exe": "acServer", "contentDir": "/opt/assetto/content" },
+    "lmu": { "steamAppId": null, "platform": "windows", "exe": "LMU Dedicated.exe" },
+    "fs": { "steamAppId": 447020, "platform": "windows", "exe": "dedicatedServer.exe" }
+  },
   "electricity": {
     "ratePerKwh": 0.206
   },
