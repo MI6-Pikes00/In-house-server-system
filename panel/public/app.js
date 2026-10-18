@@ -231,7 +231,7 @@
           <div class="panel-b"><div class="chart-box"><canvas id="c-tmp" aria-label="Température processeur sur 30 minutes, seuil 80 degrés"></canvas></div></div></section>
         <section class="panel host" aria-labelledby="host-t"><div class="panel-h"><h2 id="host-t">Machine</h2></div>
           <div class="panel-b"><dl class="stats">
-            <div><dt>Disque</dt><dd>${st ? `${fmt(st.disk.used / GB, 0)} / ${fmt(st.disk.total / GB, 0)} Go` : '—'}</dd></div>
+            <div><dt>Disque</dt><dd>${st && st.disk ? `${fmt(st.disk.used / GB, 0)} / ${fmt(st.disk.total / GB, 0)} Go` : '—'}</dd></div>
             <div><dt>Consommation</dt><dd id="watts">${st ? st.power.watts + ' W' : '—'}</dd></div>
             <div><dt>Coût estimé / mois</dt><dd>${st ? fmt(st.power.monthlyCost, 2) + ' €' : '—'}</dd></div>
             <div><dt>Allumé depuis</dt><dd>${st ? fmtUptime(st.uptime) : '—'}</dd></div>

@@ -400,6 +400,8 @@ app.get('/api/stats', requireAuth, async (req, res) => {
     const uptime = parseFloat(fs.readFileSync('/proc/uptime', 'utf8').split(' ')[0]);
     let diskInfo = await new Promise(resolve => {
       exec('df -B1 /opt/minecraft', (err, stdout) => {
+        // Sans ce garde, un df en échec (dossier absent, démonté) faisait planter tout le panel.
+        if (err) return resolve(null);
         const lines = stdout.trim().split('\n');
         const parts = lines[1].split(/\s+/);
         resolve({ total: parseInt(parts[1]), used: parseInt(parts[2]), available: parseInt(parts[3]) });
